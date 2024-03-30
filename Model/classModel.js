@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
-
+const sequence = require("mongoose-sequence")(mongoose);
 const classSchema = new mongoose.Schema({
     _id: {
         type: Number,
-        required: true,
+        // required: true,
         // unique: true
     },
     name: {
@@ -22,6 +22,7 @@ const classSchema = new mongoose.Schema({
     }] 
 
 });
+classSchema.plugin(sequence, { id: "class", incField:"_id" });
 
 module.exports = mongoose.model("class", classSchema);
 

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const sequence = require("mongoose-sequence")(mongoose);
 
 const addressSchema = new mongoose.Schema({
     city: {
@@ -17,7 +18,7 @@ const addressSchema = new mongoose.Schema({
 const childSchema = new mongoose.Schema({
     _id: {
         type: Number,
-        required: true,
+        // required: true,
         // unique: true
     },
     fullName: {
@@ -35,6 +36,20 @@ const childSchema = new mongoose.Schema({
     },
     address: addressSchema,
 });
+childSchema.plugin(sequence, { id: "child", incField: "_id" });
+// childSchema.statics.resetSequence = async function () {
+//     try {
+//         const count = await this.countDocuments();
+//         if (count === 0) {
+//             await this.updateOne({}, { $set: { _id: 1 } });
+//         } else {
+//             await this.updateOne({}, { $set: { _id: count + 1 } });
+//         }
+//     } catch (error) {
+//         console.error("Error resetting sequence:", error);
+//     }
+// };
+
 module.exports = mongoose.model("child", childSchema);
 
 
