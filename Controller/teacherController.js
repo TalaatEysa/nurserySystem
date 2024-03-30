@@ -166,3 +166,27 @@ exports.getAllSupervisors = (req, res, next) => {
         })
         .catch((err) => next(err));
 };
+exports.changePassword = async (req, res, next) => {
+    try {
+        const id = req.params.id;
+        const teacher = await teacherSchema.findById(id);
+
+        if (!teacher) {
+            res.status(404).json({ message: "Teacher not found" });
+        }
+        const validPassword = await bcrypt.compare(req.body.oldPassword, teacher.password);
+
+        if (!validPassword) {
+            res.status(400).json({ message: "Invalid password" });
+        }
+
+        const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
+
+        await teacherSchema.findByIdAndUpdate(id, { password: hashedPassword });
+        res.status(200).json({ message: "Password changed successfully" });
+        
+        
+    }catch (err) {
+        next(err);
+    }
+}
