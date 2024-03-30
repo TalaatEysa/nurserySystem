@@ -47,3 +47,11 @@ exports.validateId = [
         .isMongoId()
         .withMessage("Teacher id should be Monjo Id"),
 ];
+exports.changePasswordValidator = [
+    body("oldPassword")
+        .isLength({ min: 5 })
+        .withMessage("incorrect old password, password length should be greater than 5"),
+    body("newPassword")
+        .isLength({ min: 5 })
+        .withMessage("incorrect new password, password length should be greater than 5"),
+];
