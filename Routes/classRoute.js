@@ -1,5 +1,5 @@
 const express = require("express");
-const controller = require('./../controller/classController');
+const controller = require('./../Controller/classController');
 const {
     insertValidator,
     updateValidator,

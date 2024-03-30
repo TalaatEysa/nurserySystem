@@ -17,6 +17,6 @@ router
 
 router.route("/child/:id")
     .get(childIdvalidator, validatonResult, controller.getChildById)
-    .delete(controller.deleteChild)
+    .delete(childIdvalidator, validatonResult, controller.deleteChild)
 
 module.exports = router;

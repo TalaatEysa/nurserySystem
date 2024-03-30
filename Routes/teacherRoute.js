@@ -11,18 +11,21 @@ const {isAdmin, isTeacher} = require("./../Middlewares/authenticationMW");
 
 router
     .route("/teachers")
-    .get(isAdmin,controller.getAllTeachers)
-    .post(isTeacher,insertValidator, validatonResult, controller.insertTeacher)
-    .patch(isTeacher,updateValidator, validatonResult, controller.updateTeacher)
-    // .delete(controller.deleteTeacher)
+    .get(isAdmin, controller.getAllTeachers)
+    .post(isAdmin, insertValidator, validatonResult, controller.insertTeacher)
+    .patch(isAdmin, updateValidator, validatonResult, controller.updateTeacher);
+// .delete(controller.deleteTeacher)
+
+router.get("/teachers/supervisors", isAdmin, controller.getAllSupervisors);
 
 // router.get("/teachers/:id", validateId, validatonResult, controller.getTeacherById)
 router.route("/teachers/:id")
     .all(isAdmin)
     .get(validateId, validatonResult, controller.getTeacherById)
-    .delete(validateId, validatonResult, controller.deleteTeacher)
+    .delete(validateId, validatonResult, controller.deleteTeacher);
 
-router.get("/teachers/supervisors",isAdmin, controller.getAllSupervisors)
+// router.get("/teachers/supervisors",isAdmin, controller.getAllSupervisors)
+
 
 
 module.exports = router;

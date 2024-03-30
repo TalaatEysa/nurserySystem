@@ -37,7 +37,7 @@ server.use((error, request, response, next) => {
 
 });
 
-mongoose.connect("mongodb://127.0.0.1:27017/NurserySystem")
+mongoose.connect(process.env.URL)
     .then(() => {
         console.log("DB connected");
         server.listen(port, () => {
