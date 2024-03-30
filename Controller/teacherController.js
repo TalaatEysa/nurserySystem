@@ -1,10 +1,11 @@
 const teacherSchema = require("../Model/teacherModel");
 const classSchema = require("../Model/classModel");
+const bcrypt = require("bcrypt");
 exports.getAllTeachers = (req, res, next) => {
     teacherSchema.find()
         .then((data) => res.status(200).json(data))
         .catch((err) => next(err));
-            
+
     // res.status(200).json({ data: [] });
 };
 
@@ -22,26 +23,39 @@ exports.getTeacherById = (req, res, next) => {
 };
 
 exports.insertTeacher = (req, res, next) => {
-    const teacher = new teacherSchema(req.body);
+    const { fullname, password, email, image, role } = req.body;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    // const teacher = new teacherSchema(req.body);
+    const teacher = new teacherSchema(
+        {
+            fullname,
+            email,
+            password: hashedPassword,
+            image,
+            role
+        }) 
     teacher.save()
         .then((data) => {
             res.status(200).json({ data: "new teacher added" });
         })
         .catch((err) => next(err));
-    
+
     // res.status(200).json({ data: "added" });
 };
 
 exports.updateTeacher = (req, res, next) => {
     const id = req.body._id;
+    if (req.body.password) {
+        req.body.password = bcrypt.hashSync(req.body.password, 10);
+    }
     teacherSchema.findByIdAndUpdate(id, req.body, { new: true })
         .then((data) => {
             if (!data) {
                 res.status(404).json({ data: "Teacher not found" });
             }
-            res.status(200).json({data: "updated" });
-        
-    }).catch((err) => next(err));
+            res.status(200).json({ data: "updated" });
+
+        }).catch((err) => next(err));
 
 
     // res.status(200).json({ data: "updated" });
@@ -54,7 +68,7 @@ exports.deleteTeacher = (req, res, next) => {
             if (!data) {
                 res.status(404).json({ data: "Teacher not found" });
             }
-            res.status(200).json({data: "deleted" });
+            res.status(200).json({ data: "deleted" });
         })
         .catch((err) => next(err));
 
@@ -77,7 +91,7 @@ exports.deleteTeacher = async (req, res, next) => {
         const classes = await classSchema.find({ supervisor: id });
 
         if (classes.length > 0) {
-            const defaultSupervisor = await teacherSchema.findOne({ _id: { $ne: ObjectId(_id) } });;
+            const defaultSupervisor = await teacherSchema.findOne({ _id: { $ne: id } });;
 
             await classSchema.updateMany({ supervisor: id }, { supervisor: defaultSupervisor._id });
         }
@@ -97,25 +111,58 @@ exports.deleteTeacher = async (req, res, next) => {
 
 
 
+// exports.getAllSupervisors = (req, res, next) => {
+//     classSchema.find({})
+//         .populate({
+//             path: "supervisor",
+//             select: { fullname: 1 },
+//         })
+//         .then((data) => {
+//             if (!data) {
+//                 res.status(404).json({ message: "Class not found" });
+//             }
+//             let SupervisorData = data.map((item) => item.supervisor);
+//             res.status(200).json(SupervisorData);
+//         })
+//         .catch((err) => next(err));
+
+
+
+
+//     // res.status(200).json({ data: [] });
+//     // res.status(200).json({ data: req.params });
+
+// }
 exports.getAllSupervisors = (req, res, next) => {
-    classSchema.find({})
-        .populate({
-            path: "supervisor",
-            select: {fullname: 1},
-        })
+    classSchema.aggregate([
+        {
+            $group: {
+                _id: "$supervisor",
+                supervisor: { $first: "$supervisor" } // Preserve the supervisor field
+            }
+        },
+        {
+            $lookup: {
+                from: "teachers", // Assuming the teacher collection name is "teachers"
+                localField: "_id",
+                foreignField: "_id",
+                as: "supervisorData"
+            }
+        },
+        {
+            $project: {
+                _id: "$supervisor", // Rename _id to supervisor
+                fullname: { $arrayElemAt: ["$supervisorData.fullname", 0] } // Extract fullname from the lookup result
+            }
+        }
+    ])
         .then((data) => {
             if (!data) {
-                res.status(404).json({ message: "Class not found" });
+                res.status(404).json({ message: "No supervisors found" });
+                return;
             }
-            let SupervisorData = data.map((item) => item.supervisor);
-            res.status(200).json(SupervisorData);
+
+            res.status(200).json(data);
         })
         .catch((err) => next(err));
-    
-    
-    
-    
-    // res.status(200).json({ data: [] });
-    // res.status(200).json({ data: req.params });
-
-}
+};
