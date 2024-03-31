@@ -8,7 +8,7 @@ const {
 
 const validatonResult = require("./../Middlewares/validations/validatorResult");
 const router = express.Router();
-const { isAdmin, isTeacher, isAuthorized } = require("./../Middlewares/authenticationMW");
+const { isAdmin } = require("./../Middlewares/authenticationMW");
 
 
 router

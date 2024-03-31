@@ -9,7 +9,7 @@ const {
 } = require("./../Middlewares/validations/classValidator");
 const validationResult = require("./../Middlewares/validations/validatorResult");
 const router = express.Router();
-const { isAdmin, isTeacher, isAuthorized } = require("./../Middlewares/authenticationMW");
+const { isAdmin } = require("./../Middlewares/authenticationMW");
 
 
 router.route("/class")
@@ -20,7 +20,7 @@ router.route("/class")
 
 router.route("/class/:id")
     .all(isAdmin)
-    get(classIdValidator, validationResult, controller.getClassById)
+    .get(classIdValidator, validationResult, controller.getClassById)
     .delete(classIdValidator, validationResult,controller.deleteClass);
 
 
