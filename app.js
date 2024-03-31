@@ -7,6 +7,7 @@ const teacherRoute = require('./Routes/teacherRoute');
 const childRoute = require('./Routes/childRoute');
 const classRoute = require('./Routes/classRoute');
 const loginRoute = require('./Routes/authentication');
+const registerRoute = require('./Routes/registerRoute');
 const authenticationMW = require('./Middlewares/authenticationMW');
 const server = express();
 const multer = require('multer');
@@ -46,6 +47,7 @@ server.use(multer({ storage,fileFilter}).single('image'));
 server.use(express.json());
 // EndPoints
 server.use(loginRoute);
+server.use(registerRoute);
 server.use(authenticationMW);
 server.use(teacherRoute);
 server.use(childRoute);
