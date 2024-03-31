@@ -70,31 +70,6 @@ exports.deleteChild = async(req, res, next) => {
     
 
 };
-// exports.deleteChild = async (req, res, next) => {
-//     try {
-//         const id = req.params.id;
 
-//         // Find all classes that have the child
-//         const classesWithChild = await classSchema.find({ children: id });
-
-//         // Remove the child from each class
-//         for (const classDoc of classesWithChild) {
-//             classDoc.children.pull(id);
-//             await classDoc.save();
-//         }
-
-//         // Delete the child
-//         const deletedChild = await childSchema.findByIdAndDelete(id);
-
-//         if (!deletedChild) {
-//             // If child not found, return 404
-//             return res.status(404).json({ message: "Child not found" });
-//         }
-
-//         res.status(200).json({ data: "deleted" });
-//     } catch (error) {
-//         next(error);
-//     }
-// };
 
 
