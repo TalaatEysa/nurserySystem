@@ -3,8 +3,7 @@ const sequence = require("mongoose-sequence")(mongoose);
 const classSchema = new mongoose.Schema({
     _id: {
         type: Number,
-        // required: true,
-        // unique: true
+
     },
     name: {
         type: String,
