@@ -35,6 +35,27 @@ const fileFilter = (req, file, cb) => {
         cb(null, false);
     }
 }
+//swagger variables
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Nursery System API Documentation',
+            version: '1.0.0',
+            description: 'Nursery System aims to help parents and teachers manage their children growth and development.',
+        },
+        servers: [
+            {
+                url: 'http://localhost:8080',
+                description: 'Development server'
+            }
+        ]
+    },
+    apis: ['./Routes/*.js']
+}
+const swaggerSpec = swaggerJSDoc(options);
 
 
 //first middleware for login 
@@ -45,6 +66,8 @@ server.use(cors());
 server.use("/images", express.static(path.join(__dirname, "images")));
 server.use(multer({ storage,fileFilter}).single('image'));
 server.use(express.json());
+server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // EndPoints
 server.use(loginRoute);
 server.use(registerRoute);
