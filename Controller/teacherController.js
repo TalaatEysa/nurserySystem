@@ -23,15 +23,19 @@ exports.getTeacherById = (req, res, next) => {
 };
 
 exports.insertTeacher = (req, res, next) => {
-    const { fullname, password, email, image, role } = req.body;
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const { fullname, password, email, role } = req.body;
+    const hashedPassword = bcrypt.hash(password, 10);
+    // const imageFilename = req.file ? req.file.filename : '';
     // const teacher = new teacherSchema(req.body);
+    if (!req.file) { 
+        return res.status(400).json({ message: "Image is required" });
+    }
     const teacher = new teacherSchema(
         {
             fullname,
             email,
             password: hashedPassword,
-            image,
+            image: req.file.filename,
             role
         }) 
     teacher.save()
@@ -43,23 +47,64 @@ exports.insertTeacher = (req, res, next) => {
     // res.status(200).json({ data: "added" });
 };
 
-exports.updateTeacher = (req, res, next) => {
-    const id = req.body._id;
-    if (req.body.password) {
-        req.body.password = bcrypt.hashSync(req.body.password, 10);
+// exports.updateTeacher = (req, res, next) => {
+//     const id = req.body._id;
+//     const { fullname, password, email, role } = req.body;
+//     const oldImage = teacherSchema.findOne({ image: req.body.oldImage });
+//     if(!req.file){
+//         req.body.image = req.body.oldImage;
+//     }else{
+//         req.body.image = req.file.filename
+//     }
+//     if (req.body.password) {
+//         req.body.password = bcrypt.hash(req.body.password, 10);
+//     }
+//     teacherSchema.findByIdAndUpdate(id, req.body, { new: true })
+//         .then((data) => {
+//             if (!data) {
+//                 res.status(404).json({ data: "Teacher not found" });
+//             }
+//             res.status(200).json({ data: "updated" });
+
+//         }).catch((err) => next(err));
+
+
+//     // res.status(200).json({ data: "updated" });
+// };
+exports.updateTeacher = async (req, res, next) => {
+    try {
+        const id = req.body._id;
+        const { fullname, password, email, role } = req.body;
+
+        // Find the old image filename associated with the teacher
+        const oldImage = await teacherSchema.findOne({ _id: id }).select('image');
+
+        // If no file is uploaded, keep the old image filename
+        if (!req.file) {
+            req.body.image = oldImage.image;
+        } else {
+            req.body.image = req.file.filename;
+        }
+
+        // Hash the password if provided
+        if (password) {
+            req.body.password = bcrypt.hashSync(password, 10);
+        }
+
+        // Update the teacher information
+        const updatedTeacher = await teacherSchema.findByIdAndUpdate(id, req.body, { new: true });
+
+        // If teacher is not found, return 404 status
+        if (!updatedTeacher) {
+            return res.status(404).json({ data: "Teacher not found" });
+        }
+
+        res.status(200).json({ data: "updated" });
+    } catch (err) {
+        next(err);
     }
-    teacherSchema.findByIdAndUpdate(id, req.body, { new: true })
-        .then((data) => {
-            if (!data) {
-                res.status(404).json({ data: "Teacher not found" });
-            }
-            res.status(200).json({ data: "updated" });
-
-        }).catch((err) => next(err));
-
-
-    // res.status(200).json({ data: "updated" });
 };
+
 
 exports.deleteTeacher = (req, res, next) => {
     const id = req.params.id;
@@ -138,12 +183,12 @@ exports.getAllSupervisors = (req, res, next) => {
         {
             $group: {
                 _id: "$supervisor",
-                supervisor: { $first: "$supervisor" } // Preserve the supervisor field
+                supervisor: { $first: "$supervisor" } 
             }
         },
         {
             $lookup: {
-                from: "teachers", // Assuming the teacher collection name is "teachers"
+                from: "teachers", 
                 localField: "_id",
                 foreignField: "_id",
                 as: "supervisorData"
@@ -151,8 +196,8 @@ exports.getAllSupervisors = (req, res, next) => {
         },
         {
             $project: {
-                _id: "$supervisor", // Rename _id to supervisor
-                fullname: { $arrayElemAt: ["$supervisorData.fullname", 0] } // Extract fullname from the lookup result
+                _id: "$supervisor", 
+                fullname: { $arrayElemAt: ["$supervisorData.fullname", 0] } 
             }
         }
     ])
