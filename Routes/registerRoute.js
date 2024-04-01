@@ -49,9 +49,10 @@ const {
 } = require("./../Middlewares/validations/teacherValidator");
 const validatonResult = require("./../Middlewares/validations/validatorResult");
 const router = express.Router();
+const imageController = require("./../Controller/imageController");
 
 
-router.post("/register",insertValidator, validatonResult, controller.registerTeacher);
+router.post("/register", imageController.upload.single("image"),insertValidator, validatonResult, controller.registerTeacher);
 
 
 

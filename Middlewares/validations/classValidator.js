@@ -1,6 +1,7 @@
 const { body, param } = require("express-validator");
 const teacherSchema = require("./../../Model/teacherModel");
 const childSchema = require("./../../Model/childModel");
+const classSchema = require("./../../Model/classModel");
 
 exports.insertValidator = [
     // body("_id")
@@ -24,6 +25,13 @@ exports.insertValidator = [
     body("children.*")
         .isInt()
         .withMessage("Children IDs should be integers").custom(async (value) => {
+            const existingClass = await classSchema.findOne({ children: value });
+            if (existingClass) {
+                throw new Error(`Child with ID ${value} is already assigned to another class`);
+            }
+            return true;
+        })
+        .custom(async (value) => {
             const child = await childSchema.findOne({ _id: value });
             if (!child) {
                 throw new Error("Child not found");
@@ -53,6 +61,13 @@ exports.updateValidator = [
     body("children.*").optional()
         .isInt()
         .withMessage("Children IDs should be integers").custom(async (value) => {
+            const existingClass = await classSchema.findOne({ children: value });
+            if (existingClass) {
+                throw new Error(`Child with ID ${value} is already assigned to another class`);
+            }
+            return true;
+        })
+        .custom(async (value) => {
             const child = await childSchema.findOne({ _id: value });
             if (!child) {
                 throw new Error("Child not found");

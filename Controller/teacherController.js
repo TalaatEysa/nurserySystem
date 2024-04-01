@@ -1,6 +1,48 @@
 const teacherSchema = require("../Model/teacherModel");
 const classSchema = require("../Model/classModel");
 const bcrypt = require("bcrypt");
+const fs = require("fs");
+
+exports.insertTeacher = async (req, res, next) => {
+    try {
+        const { fullname, password, email, role } = req.body;
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        if (req.file) {
+            // Constructing the image filename using template literals
+            req.body.image = `${new Date().toLocaleDateString().replace(/\//g, '-')}-${req.file.originalname}`;
+            fs.writeFile(`./images/teachers/${req.body.image}`, req.file.buffer, (err) => {
+                if (err) return next(err);
+            });
+        }
+        
+        // Check if the email already exists in the database
+        const existingTeacher = await teacherSchema.findOne({ email });
+        if (existingTeacher) {
+            return res.status(400).json({ message: "Email already exists, please use another email" });
+        }
+        const existingAdmin = await teacherSchema.findOne({ role: "admin" });
+        if (existingAdmin && role === "admin") {
+            return res.status(400).json({ message: "Admin already exists, There can be only one admin" });
+        }
+        // Create a new teacher instance
+        const teacher = new teacherSchema({
+            fullname,
+            email,
+            password: hashedPassword, // Use the hashed password
+            image: req.body.image,
+            role
+        });
+
+        // Save the teacher to the database
+        await teacher.save();
+
+        res.status(200).json({ data: "new teacher added" });
+    } catch (err) {
+        next(err);
+    }
+};
 exports.getAllTeachers = (req, res, next) => {
     teacherSchema.find()
         .then((data) => res.status(200).json(data))
@@ -19,48 +61,7 @@ exports.getTeacherById = (req, res, next) => {
             res.status(200).json(data);
         })
         .catch((err) => next(err));
-    // res.status(200).json({ data: req.params });
 };
-
-
-exports.insertTeacher = async (req, res, next) => {
-    try {
-        const { fullname, password, email, role } = req.body;
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        if (!req.file) {
-            return res.status(400).json({ message: "Image is required" });
-        }
-        // Check if the email already exists in the database
-        const existingTeacher = await teacherSchema.findOne({ email });
-        if (existingTeacher) {
-            return res.status(400).json({ message: "Email already exists, please use another email" });
-        }
-        const existingAdmin = await teacherSchema.findOne({ role: "admin" });
-        if (existingAdmin && role === "admin") {
-            return res.status(400).json({ message: "Admin already exists, There can be only one admin" });
-        }
-        // Create a new teacher instance
-        const teacher = new teacherSchema({
-            fullname,
-            email,
-            password: hashedPassword, // Use the hashed password
-            image: req.file.filename,
-            role
-        });
-
-        // Save the teacher to the database
-        await teacher.save();
-
-        res.status(200).json({ data: "new teacher added" });
-    } catch (err) {
-        next(err);
-    }
-};
-
-
 
 exports.updateTeacher = async (req, res, next) => {
     try {
@@ -71,10 +72,12 @@ exports.updateTeacher = async (req, res, next) => {
         const oldImage = await teacherSchema.findOne({ _id: id }).select('image');
 
         // If no file is uploaded, keep the old image filename
-        if (!req.file) {
-            req.body.image = oldImage.image;
-        } else {
-            req.body.image = req.file.filename;
+        if (req.file) {
+            // Constructing the image filename using template literals
+            req.body.image = `${new Date().toLocaleDateString().replace(/\//g, '-')}-${req.file.originalname}`;
+            fs.writeFile(`./images/${req.body.image}`, req.file.buffer, (err) => {
+                if (err) return next(err);
+            });
         }
 
         // Hash the password if provided
@@ -96,22 +99,6 @@ exports.updateTeacher = async (req, res, next) => {
     }
 };
 
-
-exports.deleteTeacher = (req, res, next) => {
-    const id = req.params.id;
-    teacherSchema.findByIdAndDelete(id)
-        .then((data) => {
-            if (!data) {
-                res.status(404).json({ data: "Teacher not found" });
-            }
-            res.status(200).json({ data: "deleted" });
-        })
-        .catch((err) => next(err));
-
-
-
-    // res.status(200).json({ data: "deleted" });
-}
 
 exports.deleteTeacher = async (req, res, next) => {
     const id = req.params.id;
@@ -147,12 +134,12 @@ exports.getAllSupervisors = (req, res, next) => {
         {
             $group: {
                 _id: "$supervisor",
-                supervisor: { $first: "$supervisor" } 
+                supervisor: { $first: "$supervisor" }
             }
         },
         {
             $lookup: {
-                from: "teachers", 
+                from: "teachers",
                 localField: "_id",
                 foreignField: "_id",
                 as: "supervisorData"
@@ -160,8 +147,8 @@ exports.getAllSupervisors = (req, res, next) => {
         },
         {
             $project: {
-                _id: "$supervisor", 
-                fullname: { $arrayElemAt: ["$supervisorData.fullname", 0] } 
+                _id: "$supervisor",
+                fullname: { $arrayElemAt: ["$supervisorData.fullname", 0] }
             }
         }
     ])
@@ -193,9 +180,9 @@ exports.changePassword = async (req, res, next) => {
 
         await teacherSchema.findByIdAndUpdate(id, { password: hashedPassword });
         res.status(200).json({ message: "Password changed successfully" });
-        
-        
-    }catch (err) {
+
+
+    } catch (err) {
         next(err);
     }
 }
@@ -206,8 +193,12 @@ exports.registerTeacher = async (req, res, next) => {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        if (!req.file) {
-            return res.status(400).json({ message: "Image is required" });
+        if (req.file) {
+            // Constructing the image filename using template literals
+            req.body.image = `${new Date().toLocaleDateString().replace(/\//g, '-')}-${req.file.originalname}`;
+            fs.writeFile(`./images/teachers/${req.body.image}`, req.file.buffer, (err) => {
+                if (err) return next(err);
+            });
         }
 
         // Check if the email already exists in the database
@@ -221,7 +212,7 @@ exports.registerTeacher = async (req, res, next) => {
             fullname,
             email,
             password: hashedPassword, // Use the hashed password
-            image: req.file.filename,
+            image: req.body.image,
             role: "teacher" // Hardcoded role as "teacher"
         });
 

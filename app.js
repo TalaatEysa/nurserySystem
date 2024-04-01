@@ -10,31 +10,10 @@ const loginRoute = require('./Routes/authentication');
 const registerRoute = require('./Routes/registerRoute');
 const authenticationMW = require('./Middlewares/authenticationMW');
 const server = express();
-const multer = require('multer');
-const path = require('path');
+
 const port = process.env.PORT || 8080;
 
-//image variables
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        console.log(path.join(__dirname,'images'));
-        cb(null,path.join(__dirname,'images'))
-    },
-    filename: (req, file, cb) => {
-        cb(null, new Date().toLocaleDateString().replace(/\//g, '-') + '-' + file.originalname)
-    }
-})
 
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/jpeg' ||
-        file.mimetype === 'image/jpg' ||
-        file.mimetype === 'image/png') {
-            cb(null, true);
-    }
-    else {
-        cb(null, false);
-    }
-}
 //swagger variables
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
@@ -63,8 +42,7 @@ server.use(morgan(":method :url"));
 //second middleware for cors
 server.use(cors());
 
-server.use("/images", express.static(path.join(__dirname, "images")));
-server.use(multer({ storage,fileFilter}).single('image'));
+
 server.use(express.json());
 server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -86,6 +64,7 @@ server.use((error, request, response, next) => {
     response.status(500).json({ data: ` ${error}` })
 
 });
+
 
 mongoose.connect(process.env.URL)
     .then(() => {

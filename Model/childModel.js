@@ -18,15 +18,19 @@ const addressSchema = new mongoose.Schema({
 const childSchema = new mongoose.Schema({
     _id: {
         type: Number,
-        // required: true,
-        // unique: true
+
     },
     fullName: {
         type: String,
         required: true,
+        unique: true
     },
     age: {
         type: Number,
+        required: true,
+    },
+    image: {
+        type: String,
         required: true,
     },
     level: {

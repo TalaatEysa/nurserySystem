@@ -159,14 +159,16 @@ const {
 const validatonResult = require("./../Middlewares/validations/validatorResult");
 const router = express.Router();
 const { isAdmin, isTeacher, isAuthorized } = require("./../Middlewares/authenticationMW");
+const imageController = require("./../Controller/imageController");
+
 
 
 router
     .route("/child")
     .all(isAdmin)
     .get(controller.getAllChildren)
-    .post(insertValidator, validatonResult, controller.insertChild)
-    .patch(updateValidator, validatonResult, controller.updateChild)
+    .post(imageController.upload.single("image"),insertValidator, validatonResult, controller.insertChild)
+    .patch(imageController.upload.single("image"),updateValidator, validatonResult, controller.updateChild)
 
 router.route("/child/:id")
     .all(isAdmin)

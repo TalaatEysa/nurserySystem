@@ -8,7 +8,6 @@ exports.getAllClasses = (req, res, next) => {
         .then((data) => res.status(200).json(data))
         .catch((err) => next(err));
 
-    // res.status(200).json({ data: [] });
 };
 
 exports.getClassById = (req, res, next) => {
@@ -24,35 +23,32 @@ exports.getClassById = (req, res, next) => {
         })
         .catch((err) => next(err));
 
-    // res.status(200).json({ data: req.params });
+};
+exports.insertClass = async (req, res, next) => {
+    try {
+        const supervisor = await teacherSchema.findById(req.body.supervisor);
+        if (!supervisor) {
+            return res.status(404).json({ message: "Teacher not found" });
+        }
+        const childrenArray = await childSchema.find({ _id: { $in: req.body.children } });
+        if (childrenArray.length !== req.body.children.length) {
+            // throw new Error(`${req.body.children.length - childrenArray.length} children not found`);
+            return res.status(404).json({ message: "children number is greater than registered" });
+        }
+        const existingClass = await classSchema.findOne({ name: req.body.name });
+        if (existingClass) {
+            return res.status(400).json({ message: "class name already exists, please use another name" });
+
+        }
+        const newClass = new classSchema(req.body);
+        await newClass.save();
+
+        res.status(200).json({ data: "new class added" });
+    } catch (err) {
+        next(err);
+    }
 };
 
-exports.insertClass = (req, res, next) => {
-    teacherSchema.findOne({ _id: req.body.supervisor })
-        .then((data) => {
-            if (!data) {
-                res.status(404).json({ message: "Teacher not found" });
-            } else {
-                return childSchema.find({ _id: { $in: req.body.children } });
-            }
-        })
-        .then((childrenArray) => {
-            if (childrenArray.length !== req.body.children.length) {
-                next(new Error(`${req.body.children.length - childrenArray.length} children not found`));
-                
-            }
-            else {
-                const newClass = new classSchema(req.body);
-                return newClass.save();
-            }
-            
-        }).then((data) => {
-            res.status(200).json({ data: "new class added" });
-        })
-        .catch((err) => next(err));
-    
-    // res.status(200).json({ data: "added" });
-};
 
 exports.updateClass = async (req, res, next) => {
     if (req.body.supervisor!=null) {
@@ -65,6 +61,10 @@ exports.updateClass = async (req, res, next) => {
         if (children.length !== req.body.children.length) {
             next(new Error(`${req.body.children.length - children.length} children not found`));
         }
+    }
+    const existingClass = await classSchema.findOne({ name: req.body.name });
+    if (existingClass) {
+        next(new Error("class name already exists, please use another name"));
     }
     classSchema.findByIdAndUpdate(req.body._id, req.body, { new: true })
         .then((data) => {
@@ -101,7 +101,6 @@ exports.getClassChildrenInfo = (req, res, next) => {
         .catch((err) => next(err));
 
 
-    // res.status(200).json({ data: req.params });
 }
 exports.getClassTeacherInfo = (req, res, next) => {
     classSchema.find({ _id: req.params.id }, { _id: 0, supervisor: 1, })
@@ -113,5 +112,4 @@ exports.getClassTeacherInfo = (req, res, next) => {
             res.status(200).json(data);
         })
         .catch((err) => next(err));
-    // res.status(200).json({ data: req.params });
 }

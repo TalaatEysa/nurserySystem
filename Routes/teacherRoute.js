@@ -235,13 +235,16 @@ const {
 } = require("./../Middlewares/validations/teacherValidator");
 const validatonResult = require("./../Middlewares/validations/validatorResult");
 const router = express.Router();
-const {isAdmin, isTeacher,isAuthorized} = require("./../Middlewares/authenticationMW");
+const { isAdmin, isTeacher, isAuthorized } = require("./../Middlewares/authenticationMW");
+const imageController = require("./../Controller/imageController");
+
 
 router
     .route("/teachers")
     .get(isAdmin, controller.getAllTeachers)
-    .post(isAdmin, insertValidator, validatonResult, controller.insertTeacher)
-    .patch(isAuthorized, updateValidator, validatonResult, controller.updateTeacher);
+    .post(isAdmin,imageController.upload.single("image"), insertValidator, validatonResult, controller.insertTeacher)
+
+    .patch(isAuthorized, imageController.upload.single("image"),updateValidator, validatonResult, controller.updateTeacher);
 
 router.get("/teachers/supervisors", isAdmin, controller.getAllSupervisors);
 router.patch("/teachers/changePassword/:id", isAuthorized, validateId, changePasswordValidator, validatonResult, controller.changePassword);

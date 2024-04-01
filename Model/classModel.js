@@ -8,6 +8,7 @@ const classSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
+        unique: true
     },
     supervisor: {
         type: mongoose.Schema.Types.ObjectId,
