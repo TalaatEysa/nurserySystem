@@ -38,7 +38,7 @@ exports.updateValidator = [
     // body("image").optional()
     //     .isString()
     //     .withMessage("Teacher image should be string"),
-    body("role")
+    body("role").optional()
         .isIn(["admin", "teacher"])
         .withMessage("Teacher role should be admin or teacher"),
 ];

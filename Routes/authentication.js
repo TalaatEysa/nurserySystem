@@ -1,16 +1,17 @@
 /**
  * @swagger
- * tags:
+ *  tags:
  *   name: Authentication
- *   description: API endpoints for authentication
+ *   description: To Login Admin and Teacher
  */
 
 /**
  * @swagger
- * /authentication/login:
+ * /login:
  *   post:
- *     summary: Login to the system
+ *     summary: Log in as a teacher
  *     tags: [Authentication]
+ *     description: Authenticate and generate a JWT token for the teacher.
  *     requestBody:
  *       required: true
  *       content:
@@ -20,14 +21,13 @@
  *             properties:
  *               fullname:
  *                 type: string
- *                 description: The full name of the teacher
+ *                 description: The full name of the teacher.
  *               password:
  *                 type: string
- *                 format: password
- *                 description: The password of the teacher
+ *                 description: The password of the teacher.
  *     responses:
- *       '200':
- *         description: Authentication successful, returns a JWT token
+ *       200:
+ *         description: Successfully authenticated.
  *         content:
  *           application/json:
  *             schema:
@@ -35,16 +35,15 @@
  *               properties:
  *                 data:
  *                   type: string
- *                   description: Message indicating successful authentication
+ *                   description: A message indicating successful authentication.
+ *                   example: Authenticated
  *                 token:
  *                   type: string
- *                   description: JWT token for authentication
- *       '400':
- *         description: Bad request, invalid data provided
- *       '401':
- *         description: Unauthorized, teacher not found or password does not match
- *       '500':
- *         description: Internal server error
+ *                   description: JWT token for accessing protected routes.
+ *       401:
+ *         description: Unauthorized - Incorrect username or password.
+ *       500:
+ *         description: Internal server error.
  */
 
 const express = require("express");

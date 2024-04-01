@@ -16,11 +16,12 @@
  *           type: string
  *           description: The name of the class
  *         supervisor:
- *           type: string
- *           format: objectId
+ *           type: ObjectId
+ *           ref: 'teacher'
  *           description: The ID of the teacher supervising the class
  *         children:
  *           type: array
+ *           ref: 'child'
  *           items:
  *             type: number
  *           description: Array of IDs of children in the class
@@ -45,6 +46,8 @@
  *   get:
  *     summary: Get all classes
  *     tags: [Classes]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       '200':
  *         description: A list of classes
@@ -60,6 +63,8 @@
  *   post:
  *     summary: Create a new class
  *     tags: [Classes]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -79,6 +84,8 @@
  *   patch:
  *     summary: Update class information
  *     tags: [Classes]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -102,12 +109,14 @@
  *   get:
  *     summary: Get class by ID
  *     tags: [Classes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
- *           type: number
+ *           type: integer
  *         description: ID of the class to retrieve
  *     responses:
  *       '200':
@@ -124,6 +133,8 @@
  *   delete:
  *     summary: Delete class by ID
  *     tags: [Classes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -146,6 +157,8 @@
  *   get:
  *     summary: Get class information by child ID
  *     tags: [Classes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -172,12 +185,15 @@
  *   get:
  *     summary: Get class information by teacher ID
  *     tags: [Classes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
+ *           format: objectId
  *         description: ID of the teacher
  *     responses:
  *       '200':

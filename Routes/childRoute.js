@@ -5,14 +5,14 @@
  *     Child:
  *       type: object
  *       required:
- *         - _id
+ *       
  *         - fullName
  *         - age
  *         - level
  *         - address
  *       properties:
  *         _id:
- *           type: number
+ *           type: string
  *           description: The ID of the child
  *         fullName:
  *           type: string
@@ -66,8 +66,7 @@
  *           application/json:
  *             schema:
  *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Child'
+ *               
  *       500:
  *         description: Internal server error
  *
@@ -78,15 +77,38 @@
  *     security:
  *       - bearerAuth: []
  *     consumes:
- *       - application/json
+ *       -  multipart/form-data:
  *     produces:
  *       - application/json
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Child'
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 description: The full name of the child
+ *               age:
+ *                 type: number
+ *                 description: The age of the child
+ *               level:
+ *                 type: string
+ *                 description: The level of the child (PreKG, KG1, KG2)
+ *               address.city:
+ *                 type: string
+ *                 description: The city where the child lives
+ *               address.street:
+ *                 type: string
+ *                 description: The street where the child lives
+ *               address.building:
+ *                 type: string
+ *                 description: The building where the child lives
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: The image of the child
  *     responses:
  *       200:
  *         description: New child created

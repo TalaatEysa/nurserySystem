@@ -29,6 +29,10 @@
  *                 type: string
  *                 format: password
  *                 description: The password of the teacher
+ *               role:
+ *                 type: string
+ *                 example: teacher
+ *                 description: The role of the teacher
  *               image:
  *                 type: string
  *                 format: binary

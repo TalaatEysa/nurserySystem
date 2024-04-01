@@ -14,8 +14,8 @@ module.exports = (req, res, next) => {
     }
 };
 module.exports.isAuthorized = (req, res, next) => {
-    // if (req.token.role == "admin" || req.token._id == req.body._id || req.token._id == req.params._id) {
-    if (req.token.role == "admin" || req.token._id == req.params._id=== req.body._id) {
+    // if (req.token.role == "admin" ||  || req.token._id == req.params._id) {
+    if (req.token.role == "admin" || req.token._id == req.params.id || req.token._id == req.body._id) {
         next();
     }
     else next(new Error("not Authorizatied"));

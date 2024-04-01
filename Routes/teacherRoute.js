@@ -1,6 +1,11 @@
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     Teacher:
  *       type: object
@@ -109,9 +114,25 @@
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Teacher'
+ *             type: object
+ *             properties:
+ *               fullname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               role:
+ *                 type: string
+ *                 enum: [admin, teacher]
+ *               image:
+ *                 type: string
+ *                 format: binary
+ * 
  *     responses:
  *       200:
  *         description: Teacher information updated successfully
@@ -241,18 +262,18 @@ const imageController = require("./../Controller/imageController");
 
 router
     .route("/teachers")
-    .get(isAdmin, controller.getAllTeachers)
-    .post(isAdmin,imageController.upload.single("image"), insertValidator, validatonResult, controller.insertTeacher)
+    .all(isAdmin)
+    .get( controller.getAllTeachers)
+    .post(imageController.upload.single("image"), insertValidator, validatonResult, controller.insertTeacher)
 
-    .patch(isAuthorized, imageController.upload.single("image"),updateValidator, validatonResult, controller.updateTeacher);
+    .patch( imageController.upload.single("image"),updateValidator, validatonResult, controller.updateTeacher);
 
-router.get("/teachers/supervisors", isAdmin, controller.getAllSupervisors);
-router.patch("/teachers/changePassword/:id", isAuthorized, validateId, changePasswordValidator, validatonResult, controller.changePassword);
+router.get("/teachers/supervisors", isAdmin ,controller.getAllSupervisors);
+router.patch("/teachers/changePassword/:id",isAuthorized , validateId, changePasswordValidator, validatonResult, controller.changePassword);
 
 router.route("/teachers/:id")
-    .all(isAdmin)
-    .get(validateId, validatonResult, controller.getTeacherById)
-    .delete(validateId, validatonResult, controller.deleteTeacher);
+    .get(isAuthorized,validateId, validatonResult, controller.getTeacherById)
+    .delete(isAdmin,validateId, validatonResult, controller.deleteTeacher);
 
 
 

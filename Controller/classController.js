@@ -103,7 +103,7 @@ exports.getClassChildrenInfo = (req, res, next) => {
 
 }
 exports.getClassTeacherInfo = (req, res, next) => {
-    classSchema.find({ _id: req.params.id }, { _id: 0, supervisor: 1, })
+    classSchema.find({ supervisor: req.params.id }, { _id: 0, supervisor: 1, })
         .populate({ path: "supervisor", select: { _id: 0, fullname: 1 } })
         .then((data) => {
             if (!data) {

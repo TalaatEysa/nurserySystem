@@ -68,10 +68,7 @@ exports.updateTeacher = async (req, res, next) => {
         const id = req.body._id;
         const { fullname, password, email, role } = req.body;
 
-        // Find the old image filename associated with the teacher
-        const oldImage = await teacherSchema.findOne({ _id: id }).select('image');
-
-        // If no file is uploaded, keep the old image filename
+        // add image
         if (req.file) {
             // Constructing the image filename using template literals
             req.body.image = `${new Date().toLocaleDateString().replace(/\//g, '-')}-${req.file.originalname}`;
@@ -83,6 +80,15 @@ exports.updateTeacher = async (req, res, next) => {
         // Hash the password if provided
         if (password) {
             req.body.password = bcrypt.hashSync(password, 10);
+        }
+        const existingTeacher = await teacherSchema.findOne({ email });
+        if (existingTeacher) {
+            return res.status(400).json({ message: "Email already exists, please use another email" });
+        }
+
+        const existingAdmin = await teacherSchema.findOne({ role: "admin" });
+        if (existingAdmin && role === "admin") {
+            return res.status(400).json({ message: "Admin already exists, There can be only one admin" });
         }
 
         // Update the teacher information
