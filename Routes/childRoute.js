@@ -35,6 +35,10 @@
  *             building:
  *               type: string
  *               description: The building where the child lives
+ *         image:
+ *           type: string
+ *           format: binary
+ *           description: The image of the child
  */
 /**
  * @swagger
